@@ -1,15 +1,17 @@
 #!/bin/bash
 
-bold=`tput bold`
-normal=`tput sgr0`
+tb=`tput bold`
+tn=`tput sgr0`
 
+## Is YES condition.
 isyes () { [[ $1 = @(Y|y|Yes|yes) ]]; }
 br () { printf "\r\n"; }
-terminated () { br; printf "$bold WARNING!$normal You have terminated the process!"; br; exit; }
-canceled () { br; printf "$bold WARNING!$normal You have canceled the process!"; br; exit; }
-unexpected () { br; printf "$bold WARNING!$normal Something went wrong!"; br; exit; }
+warnmsgterm () { br; printf "$tb WARNING!$tn You have terminated the process!"; br; exit; }
+warnmsgcanc () { br; printf "$tb WARNING!$tn You have canceled the process!"; br; exit; }
+warnmsgunex () { br; printf "$tb WARNING!$tn Something went wrong!"; br; exit; }
 
-trap terminated SIGINT
+## Catch CTRL+C and inform about it.
+trap warnmsgterm SIGINT
 
 printf "@ Launch process?\n"
 read -p "(Enter: Yes/yes/Y/y or No/no/N/n): " result
@@ -18,7 +20,7 @@ launch=0
 if isyes "$result"; then
     launch=1
 else
-    canceled
+    warnmsgcanc
 fi
 
 br
@@ -48,13 +50,12 @@ done
 
 
 ## Change ownership and set permissions to web server log files.
-
 createall () {
 
-    successmsg () { printf "\n$bold SUCCESS:$normal Directory tree and initial files for the project $bold$pname$normal has been created successfuly!\n"; }
-    failmsg () { printf "\n$bold FAIL:$normal Directory tree and initial files for the project $bold$pname$normal has $boldNOT$normal been created!\n"; }
+    msgsuccess () { printf "\n$tb SUCCESS:$tn Directory tree and initial files for the project $tb$pname$tn has been created successfuly!\n"; }
+    msgfail () { printf "\n$tb FAIL:$tn Directory tree and initial files for the project $tb$pname$tn has$tb NOT$tn been created!\n"; }
 
-    printf "\n@ Do you want to create a project with a name $bold$pname$normal?\n"
+    printf "\n@ Do you want to create a project with a name $tb$pname$tn?\n"
     read -p "(Enter: Yes/yes/Y/y or No/no/N/n): " result
 
     if isyes "$result"; then
@@ -62,76 +63,64 @@ createall () {
         cd "$HOME/www/projects"
         mkdir "$pname"/
 
-        mkdir "$pname"/void/
+        mkdir -p "$pname"/void/root/public/
         mkdir "$pname"/void/logs/
         touch "$pname"/void/logs/p_"$pname"_void_nginx_access.log
         touch "$pname"/void/logs/p_"$pname"_void_nginx_error.log
         touch "$pname"/void/logs/p_"$pname"_void_httpd_access.log
         touch "$pname"/void/logs/p_"$pname"_void_httpd_error.log
-        mkdir "$pname"/void/root/
-        mkdir "$pname"/void/root/public/
         printf "$pname void" > "$pname"/void/root/public/index.html
 
-        mkdir "$pname"/prod/
+        mkdir -p "$pname"/prod/root/public/
         mkdir "$pname"/prod/logs/
         touch "$pname"/prod/logs/p_"$pname"_prod_nginx_access.log
         touch "$pname"/prod/logs/p_"$pname"_prod_nginx_error.log
         touch "$pname"/prod/logs/p_"$pname"_prod_httpd_access.log
         touch "$pname"/prod/logs/p_"$pname"_prod_httpd_error.log
-        mkdir "$pname"/prod/root/
-        mkdir "$pname"/prod/root/public/
         printf "$pname prod" > "$pname"/prod/root/public/index.html
 
-        mkdir "$pname"/dev/
+        mkdir -p "$pname"/dev/root/public/
         mkdir "$pname"/dev/logs/
         touch "$pname"/dev/logs/p_"$pname"_dev_nginx_access.log
         touch "$pname"/dev/logs/p_"$pname"_dev_nginx_error.log
         touch "$pname"/dev/logs/p_"$pname"_dev_httpd_access.log
         touch "$pname"/dev/logs/p_"$pname"_dev_httpd_error.log
-        mkdir "$pname"/dev/root/
-        mkdir "$pname"/dev/root/public/
         printf "$pname dev" > "$pname"/dev/root/public/index.html
 
-        mkdir "$pname"/test/
+        mkdir -p "$pname"/test/root/public/
         mkdir "$pname"/test/logs/
         touch "$pname"/test/logs/p_"$pname"_test_nginx_access.log
         touch "$pname"/test/logs/p_"$pname"_test_nginx_error.log
         touch "$pname"/test/logs/p_"$pname"_test_httpd_access.log
         touch "$pname"/test/logs/p_"$pname"_test_httpd_error.log
-        mkdir "$pname"/test/root/
-        mkdir "$pname"/test/root/public/
         printf "$pname test" > "$pname"/test/root/public/index.html
 
-        mkdir "$pname"/sbox/
+        mkdir -p "$pname"/sbox/root/public/
         mkdir "$pname"/sbox/logs/
         touch "$pname"/sbox/logs/p_"$pname"_sbox_nginx_access.log
         touch "$pname"/sbox/logs/p_"$pname"_sbox_nginx_error.log
         touch "$pname"/sbox/logs/p_"$pname"_sbox_httpd_access.log
         touch "$pname"/sbox/logs/p_"$pname"_sbox_httpd_error.log
-        mkdir "$pname"/sbox/root/
-        mkdir "$pname"/sbox/root/public/
         printf "$pname sbox" > "$pname"/sbox/root/public/index.html
 
         printf "\n@ Do you want to create a folder tree for an old version of a project?\n"
         read -p "(Enter: Yes/yes/Y/y or No/no/N/n): " result
 
         if isyes "$result"; then
-            mkdir "$pname"/old/
+            mkdir -p "$pname"/old/root/public/
             mkdir "$pname"/old/logs/
             touch "$pname"/old/logs/p_"$pname"_old_nginx_access.log
             touch "$pname"/old/logs/p_"$pname"_old_nginx_error.log
             touch "$pname"/old/logs/p_"$pname"_old_httpd_access.log
             touch "$pname"/old/logs/p_"$pname"_old_httpd_error.log
-            mkdir "$pname"/old/root/
-            mkdir "$pname"/old/root/public/
             printf "$pname old" > "$pname"/old/root/public/index.html
         fi
 
-        successmsg
+        msgsuccess
 
     else
-        failmsg
-        canceled
+        msgfail
+        warnmsgcanc
     fi
 
     flag=1
@@ -149,11 +138,11 @@ done
 ## Change ownership and set permissions to web server log files.
 changeownership () {
 
-    successmsg () { printf "\n$bold SUCCESS:$normal Ownership and permissions have been changed successfuly!\n"; }
-    failmsg () {
-        printf "\n$bold FAIL:$normal Ownership and permissions have not been changed.\n"
+    msgsuccess () { printf "\n$tb SUCCESS:$tn Ownership and permissions have been changed successfuly!\n"; }
+    msgfail () {
+        printf "\n$tb FAIL:$tn Ownership and permissions have$tb NOT$tn been changed.\n"
         printf "\tYou need to manualy execute this command or ask support to do it:\n"
-        printf "\t$bold sudo find /home/$USER/www/projects/$pname/ -type f -name p_$pname_*.log -exec chown $USER.www {} \;$normal \n"
+        printf "\t$tb sudo find /home/$USER/www/projects/$pname/ -type f -name p_$pname_*.log -exec chown $USER.www {} \;$tn\n"
     }
 
     printf "\n# Changing ownership and permissions to web server log files, you must be in 'sudoers' file to do that!\n"
@@ -162,19 +151,17 @@ changeownership () {
 
     if isyes "$result"; then
         sudo find "$pname"/ -type f -name "p_$pname_*.log" -exec chown "$USER".www {} \;
-        successmsg
+        msgsuccess
     else
-        failmsg
+        msgfail
     fi
 
 }
 
 if [[ "$flag" -eq 1 ]]; then
-
     changeownership
-
 else
-    unexpected
+    warnmsgunex
 fi
 
 
