@@ -35,7 +35,6 @@ Bash script to create web project directory tree.
 	* `$HOME/old/`				*Old version (optional).*
 	* `$HOME/old/logs/`
 	* `$HOME/old/root/`
-	* `$HOME/old/root/`
 	* `$HOME/old/root/public/`
 
 4. NGiNX and Apache log files are created for each environment and all needed file ownerships and permissions are set.
